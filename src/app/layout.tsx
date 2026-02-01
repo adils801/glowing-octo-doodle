@@ -5,6 +5,11 @@ import { Toaster } from "@/components/ui/toaster"
 export const metadata: Metadata = {
   title: 'FuelTrack Pro',
   description: 'Vehicle Fuel Tracking & Management System',
+  manifest: '/manifest.json',
+  icons: {
+    apple: 'https://picsum.photos/seed/fueltrack180/180/180',
+  },
+  themeColor: '#5c6ac4',
 };
 
 export default function RootLayout({
