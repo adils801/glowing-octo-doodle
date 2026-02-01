@@ -8,6 +8,7 @@ import {
   History,
   Settings,
   Menu,
+  Database,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -30,6 +31,7 @@ export default function MainLayout({
     { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
     { href: "/add-entry", icon: PlusSquare, label: "Add Entry" },
     { href: "/history", icon: History, label: "History" },
+    { href: "/database", icon: Database, label: "Database" },
     { href: "/settings", icon: Settings, label: "Settings" },
   ];
 

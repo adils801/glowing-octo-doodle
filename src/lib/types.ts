@@ -12,14 +12,21 @@ export interface FuelEntry {
   slipNumber: string;
   vehicleNumber: string;
   driverName: string;
-  location?: {
-    latitude: number;
-    longitude: number;
-  };
   fuelType: FuelType;
   pricePerLiter: number;
   quantity: number;
   amount: number;
   meterReading: number;
   average: number | null;
+}
+
+export interface Vehicle {
+  id: string;
+  number: string;
+  model: string;
+}
+
+export interface Driver {
+  id: string;
+  name: string;
 }

@@ -1,4 +1,4 @@
-import type { FuelPrice, FuelEntry } from './types';
+import type { FuelPrice, FuelEntry, FuelType, Vehicle, Driver } from './types';
 
 export const fuelPrices: FuelPrice[] = [
   { id: '1', name: 'Petrol', price: 279.79 },
@@ -13,7 +13,6 @@ export let fuelEntries: FuelEntry[] = [
     slipNumber: 'SN-001',
     vehicleNumber: 'ABC-123',
     driverName: 'John Doe',
-    location: { latitude: 34.0522, longitude: -118.2437 },
     fuelType: 'Petrol',
     pricePerLiter: 279.79,
     quantity: 30,
@@ -27,7 +26,6 @@ export let fuelEntries: FuelEntry[] = [
     slipNumber: 'SN-002',
     vehicleNumber: 'XYZ-789',
     driverName: 'Jane Smith',
-    location: { latitude: 40.7128, longitude: -74.0060 },
     fuelType: 'Diesel',
     pricePerLiter: 287.33,
     quantity: 50,
@@ -41,7 +39,6 @@ export let fuelEntries: FuelEntry[] = [
     slipNumber: 'SN-003',
     vehicleNumber: 'ABC-123',
     driverName: 'John Doe',
-    location: { latitude: 34.0522, longitude: -118.2437 },
     fuelType: 'Petrol',
     pricePerLiter: 279.79,
     quantity: 35,
@@ -55,7 +52,6 @@ export let fuelEntries: FuelEntry[] = [
     slipNumber: 'SN-004',
     vehicleNumber: 'LHR-007',
     driverName: 'James Bond',
-    location: { latitude: 31.5204, longitude: 74.3587 },
     fuelType: 'HOBC',
     pricePerLiter: 330.12,
     quantity: 40,
@@ -69,7 +65,6 @@ export let fuelEntries: FuelEntry[] = [
     slipNumber: 'SN-005',
     vehicleNumber: 'XYZ-789',
     driverName: 'Jane Smith',
-    location: { latitude: 40.7128, longitude: -74.0060 },
     fuelType: 'Diesel',
     pricePerLiter: 287.33,
     quantity: 55,
@@ -77,6 +72,18 @@ export let fuelEntries: FuelEntry[] = [
     meterReading: 20650,
     average: 11.82,
   },
+];
+
+export let vehicles: Vehicle[] = [
+  { id: '1', number: 'ABC-123', model: 'Toyota Corolla' },
+  { id: '2', number: 'XYZ-789', model: 'Honda Civic' },
+  { id: '3', number: 'LHR-007', model: 'Suzuki Alto' },
+];
+
+export let drivers: Driver[] = [
+  { id: '1', name: 'John Doe' },
+  { id: '2', name: 'Jane Smith' },
+  { id: '3', name: 'James Bond' },
 ];
 
 export const addFuelEntry = (entry: Omit<FuelEntry, 'id'>): FuelEntry => {
@@ -95,3 +102,21 @@ export const updateFuelPrice = (name: FuelType, newPrice: number) => {
     }
     return fuelToUpdate;
 }
+
+export const addVehicle = (vehicle: Omit<Vehicle, 'id'>): Vehicle => {
+  const newVehicle = {
+    ...vehicle,
+    id: (vehicles.length + 1).toString(),
+  };
+  vehicles.unshift(newVehicle);
+  return newVehicle;
+};
+
+export const addDriver = (driver: Omit<Driver, 'id'>): Driver => {
+  const newDriver = {
+    ...driver,
+    id: (drivers.length + 1).toString(),
+  };
+  drivers.unshift(newDriver);
+  return newDriver;
+};

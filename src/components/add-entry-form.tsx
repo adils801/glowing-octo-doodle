@@ -27,20 +27,19 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon, Loader2, LocateIcon } from "lucide-react";
+import { CalendarIcon, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import React from "react";
-import { fuelPrices, fuelEntries, addFuelEntry } from "@/lib/data";
+import { fuelPrices, fuelEntries, addFuelEntry, vehicles, drivers } from "@/lib/data";
 import { useToast } from "@/hooks/use-toast";
-import type { FuelType as FuelTypeName } from "@/lib/types";
 import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
   date: z.date({ required_error: "A date is required." }),
   slipNumber: z.string().min(1, "Slip number is required."),
-  vehicleNumber: z.string().min(1, "Vehicle number is required."),
-  driverName: z.string().min(1, "Driver name is required."),
+  vehicleNumber: z.string().min(1, "Vehicle is required."),
+  driverName: z.string().min(1, "Driver is required."),
   fuelType: z.enum(["Petrol", "Diesel", "HOBC"], {
     required_error: "Fuel type is required.",
   }),
@@ -53,11 +52,6 @@ type FormValues = z.infer<typeof formSchema>;
 export function AddEntryForm() {
   const { toast } = useToast();
   const router = useRouter();
-  const [location, setLocation] = React.useState<{
-    latitude: number;
-    longitude: number;
-  } | null>(null);
-  const [isLocating, setIsLocating] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const form = useForm<FormValues>({
@@ -103,34 +97,6 @@ export function AddEntryForm() {
     return { previousMeterReading: prevReading, average: null };
   }, [watchVehicleNumber, watchMeterReading, watchQuantity]);
 
-  const handleGetLocation = () => {
-    setIsLocating(true);
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setLocation({
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-        });
-        setIsLocating(false);
-        toast({
-          title: "Location Acquired",
-          description: `Lat: ${position.coords.latitude.toFixed(
-            4
-          )}, Lon: ${position.coords.longitude.toFixed(4)}`,
-        });
-      },
-      (error) => {
-        console.error("Geolocation error:", error);
-        toast({
-          variant: "destructive",
-          title: "Location Error",
-          description: "Could not get your location. Please enable permissions.",
-        });
-        setIsLocating(false);
-      }
-    );
-  };
-
   function onSubmit(values: FormValues) {
     setIsSubmitting(true);
     const newEntry = {
@@ -138,7 +104,6 @@ export function AddEntryForm() {
       slipNumber: values.slipNumber,
       vehicleNumber: values.vehicleNumber,
       driverName: values.driverName,
-      location: location ?? undefined,
       fuelType: values.fuelType,
       pricePerLiter,
       quantity: values.quantity,
@@ -209,7 +174,7 @@ export function AddEntryForm() {
             name="slipNumber"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Slip Number</FormLabel>
+                <FormLabel>Slip No.</FormLabel>
                 <FormControl>
                   <Input placeholder="e.g., SN-12345" {...field} />
                 </FormControl>
@@ -222,10 +187,24 @@ export function AddEntryForm() {
             name="vehicleNumber"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Vehicle Number</FormLabel>
-                <FormControl>
-                  <Input placeholder="e.g., ABC-123" {...field} />
-                </FormControl>
+                <FormLabel>Vehicle</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a vehicle" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {vehicles.map((vehicle) => (
+                      <SelectItem key={vehicle.id} value={vehicle.number}>
+                        {vehicle.number} ({vehicle.model})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}
@@ -235,41 +214,28 @@ export function AddEntryForm() {
             name="driverName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Driver Name</FormLabel>
-                <FormControl>
-                  <Input placeholder="e.g., John Doe" {...field} />
-                </FormControl>
+                <FormLabel>Driver</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a driver" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {drivers.map((driver) => (
+                      <SelectItem key={driver.id} value={driver.name}>
+                        {driver.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}
           />
-
-          <div className="space-y-2">
-            <FormLabel>User Location</FormLabel>
-            <div className="flex items-center gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleGetLocation}
-                disabled={isLocating}
-                className="w-full"
-              >
-                {isLocating ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <LocateIcon className="mr-2 h-4 w-4" />
-                )}
-                Get Current Location
-              </Button>
-            </div>
-            {location && (
-              <FormDescription>
-                Lat: {location.latitude.toFixed(4)}, Lon:{" "}
-                {location.longitude.toFixed(4)}
-              </FormDescription>
-            )}
-          </div>
-
           <FormField
             control={form.control}
             name="fuelType"

@@ -68,7 +68,6 @@ export function FuelPriceManager() {
               <div className="space-y-1">
                 <p className="font-medium">{fuel.name}</p>
                 <div className="flex items-center">
-                  <span className="text-muted-foreground mr-2">$</span>
                   <Input
                     type="number"
                     step="0.01"
