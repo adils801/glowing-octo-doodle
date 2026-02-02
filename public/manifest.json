@@ -1,36 +1,22 @@
+<link rel="manifest" href="/manifest.json" />
+<meta name="theme-color" content="#2563eb" />
 {
-  "name": "FuelTrack Pro",
-  "short_name": "FuelTrackPro",
-  "description": "Vehicle Fuel Tracking & Management System",
+  "short_name": "FuelApp",
+  "name": "Fuel Price Manager",
   "icons": [
     {
-      "src": "https://picsum.photos/seed/fueltrack192/192/192",
-      "sizes": "192x192",
+      "src": "/icons/icon-192x192.png",
       "type": "image/png",
-      "purpose": "any"
+      "sizes": "192x192"
     },
     {
-      "src": "https://picsum.photos/seed/fueltrack512/512/512",
-      "sizes": "512x512",
+      "src": "/icons/icon-512x512.png",
       "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "https://picsum.photos/seed/fueltrackmask192/192/192",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable"
-    },
-    {
-      "src": "https://picsum.photos/seed/fueltrackmask512/512/512",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
+      "sizes": "512x512"
     }
   ],
-  "theme_color": "#5c6ac4",
-  "background_color": "#f2f4f5",
-  "start_url": "/dashboard",
+  "start_url": "/",
   "display": "standalone",
-  "orientation": "portrait"
+  "theme_color": "#000000",
+  "background_color": "#ffffff"
 }

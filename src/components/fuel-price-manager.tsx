@@ -21,14 +21,18 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogFooter,
-  DialogClose
+  DialogClose,
 } from "@/components/ui/dialog";
 import { fuelPrices as initialFuelPrices, updateFuelPrice } from "@/lib/data";
 import { Bot, Loader2, Sparkles, Wand2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { getFuelPriceSuggestion } from "@/app/actions";
-import type { FuelType, FuelPrice } from "@/lib/types";
+import {
+  getFuelPriceSuggestion,
+  FuelPriceSuggestionOutput,
+} from "@/ai/flows/real-time-fuel-price-suggestions";
+import type { FuelPrice, FuelType } from "@/lib/types";
 
+/* ----------------------- MAIN COMPONENT ----------------------- */
 export function FuelPriceManager() {
   const [fuelPrices, setFuelPrices] = React.useState<FuelPrice[]>(initialFuelPrices);
   const { toast } = useToast();
@@ -78,8 +82,18 @@ export function FuelPriceManager() {
                 </div>
               </div>
               <div className="flex gap-2 w-full sm:w-auto">
-                <AiSuggestionDialog fuelType={fuel.name} onApplySuggestion={(newPrice) => handlePriceChange(fuel.id, newPrice.toString())} />
-                <Button onClick={() => handleSaveChanges(fuel.name, fuel.price)} className="w-full sm:w-auto">Save</Button>
+                <AiSuggestionDialog
+                  fuelType={fuel.name as FuelType}
+                  onApplySuggestion={(newPrice) =>
+                    handlePriceChange(fuel.id, newPrice.toString())
+                  }
+                />
+                <Button
+                  onClick={() => handleSaveChanges(fuel.name as FuelType, fuel.price)}
+                  className="w-full sm:w-auto"
+                >
+                  Save
+                </Button>
               </div>
             </div>
           ))}
@@ -89,10 +103,17 @@ export function FuelPriceManager() {
   );
 }
 
-function AiSuggestionDialog({ fuelType, onApplySuggestion }: { fuelType: FuelType; onApplySuggestion: (price: number) => void }) {
+/* ----------------------- AI SUGGESTION DIALOG ----------------------- */
+function AiSuggestionDialog({
+  fuelType,
+  onApplySuggestion,
+}: {
+  fuelType: FuelType;
+  onApplySuggestion: (price: number) => void;
+}) {
   const [isOpen, setIsOpen] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
-  const [suggestion, setSuggestion] = React.useState<{ suggestedPrice: number; reasoning: string } | null>(null);
+  const [suggestion, setSuggestion] = React.useState<FuelPriceSuggestionOutput | null>(null);
 
   const historicalData = JSON.stringify(
     [
@@ -103,6 +124,7 @@ function AiSuggestionDialog({ fuelType, onApplySuggestion }: { fuelType: FuelTyp
     null,
     2
   );
+
   const marketData = JSON.stringify(
     {
       crudeOilPrice: 82.5,
@@ -119,13 +141,12 @@ function AiSuggestionDialog({ fuelType, onApplySuggestion }: { fuelType: FuelTyp
     try {
       const result = await getFuelPriceSuggestion({
         fuelType,
-        historicalData: historicalData,
+        historicalData,
         currentMarketData: marketData,
       });
       setSuggestion(result);
     } catch (error) {
-      console.error(error);
-      // toast should be used from the main component
+      console.error("Error fetching AI suggestion:", error);
     } finally {
       setIsLoading(false);
     }
@@ -146,46 +167,71 @@ function AiSuggestionDialog({ fuelType, onApplySuggestion }: { fuelType: FuelTyp
             Get a price suggestion for {fuelType} based on market data.
           </DialogDescription>
         </DialogHeader>
+
         <div className="grid grid-cols-2 gap-4 py-4">
-            <div className="space-y-2">
-                <Label htmlFor="historical-data">Historical Data (JSON)</Label>
-                <Textarea id="historical-data" defaultValue={historicalData} readOnly className="h-40 font-mono text-xs"/>
-            </div>
-            <div className="space-y-2">
-                <Label htmlFor="market-data">Current Market Data (JSON)</Label>
-                <Textarea id="market-data" defaultValue={marketData} readOnly className="h-40 font-mono text-xs"/>
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="historical-data">Historical Data (JSON)</Label>
+            <Textarea
+              id="historical-data"
+              defaultValue={historicalData}
+              readOnly
+              className="h-40 font-mono text-xs"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="market-data">Current Market Data (JSON)</Label>
+            <Textarea
+              id="market-data"
+              defaultValue={marketData}
+              readOnly
+              className="h-40 font-mono text-xs"
+            />
+          </div>
         </div>
+
         {suggestion && (
           <Card className="bg-primary/10 border-primary/50">
             <CardHeader className="flex-row gap-4 items-start pb-4">
-                <div className="p-2 bg-primary/20 rounded-full">
-                    <Sparkles className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                    <CardTitle>AI Suggestion</CardTitle>
-                    <CardDescription className="text-foreground/80">
-                        Based on the data provided.
-                    </CardDescription>
-                </div>
+              <div className="p-2 bg-primary/20 rounded-full">
+                <Sparkles className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <CardTitle>AI Suggestion</CardTitle>
+                <CardDescription className="text-foreground/80">
+                  Based on the data provided.
+                </CardDescription>
+              </div>
             </CardHeader>
             <CardContent>
-              <p className="text-3xl font-bold text-primary">${suggestion.suggestedPrice.toFixed(2)}</p>
+              <p className="text-3xl font-bold text-primary">
+                ${suggestion.suggestedPrice.toFixed(2)}
+              </p>
               <p className="mt-2 text-sm text-muted-foreground">{suggestion.reasoning}</p>
             </CardContent>
             <CardFooter>
-                <Button variant="default" onClick={() => { onApplySuggestion(suggestion.suggestedPrice); setIsOpen(false); }}>
-                    Apply Suggestion
-                </Button>
+              <Button
+                variant="default"
+                onClick={() => {
+                  onApplySuggestion(suggestion.suggestedPrice);
+                  setIsOpen(false);
+                }}
+              >
+                Apply Suggestion
+              </Button>
             </CardFooter>
           </Card>
         )}
+
         <DialogFooter>
           <DialogClose asChild>
             <Button variant="outline">Cancel</Button>
           </DialogClose>
           <Button onClick={handleGetSuggestion} disabled={isLoading}>
-            {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Bot className="mr-2 h-4 w-4" />}
+            {isLoading ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Bot className="mr-2 h-4 w-4" />
+            )}
             Generate Suggestion
           </Button>
         </DialogFooter>

@@ -1,42 +1,11 @@
-import type {NextConfig} from 'next';
-
-const withPWA = require('@ducanh2912/next-pwa').default({
-  dest: 'public',
-  register: true,
-  skipWaiting: true,
-  disable: process.env.NODE_ENV === 'development',
+/** @type {import('next').NextConfig} */
+const withPWA = require("next-pwa")({
+  dest: "public",        // service worker aur caching files yahan create honge
+  register: true,        // auto-register service worker
+  skipWaiting: true,     // updates turant activate
+  disable: process.env.NODE_ENV === "development", // dev mode me disable
 });
 
-const nextConfig: NextConfig = {
-  /* config options here */
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'placehold.co',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'images.unsplash.com',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'picsum.photos',
-        port: '',
-        pathname: '/**',
-      },
-    ],
-  },
-};
-
-export default withPWA(nextConfig);
+module.exports = withPWA({
+  reactStrictMode: true, // agar already true hai, leave as is
+});

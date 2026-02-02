@@ -1,20 +1,28 @@
-"use server";
+// src/app/actions.ts
 
-import {
-  getFuelPriceSuggestion as getAiSuggestion,
-  type FuelPriceSuggestionInput,
-  type FuelPriceSuggestionOutput,
-} from "@/ai/flows/real-time-fuel-price-suggestions";
+import { getFuelPriceSuggestion as getAiSuggestion } from "@/ai/flows/real-time-fuel-price-suggestions";
+import type { FuelPriceSuggestionInput, FuelPriceSuggestionOutput } from "@/ai/flows/real-time-fuel-price-suggestions";
 
-export async function getFuelPriceSuggestion(
+/**
+ * Temporary fallback for AI suggestion
+ */
+export const fallbackSuggestion: FuelPriceSuggestionOutput = {
+  suggestedPrice: 0,
+  reasoning: "AI temporarily disabled",
+};
+
+/**
+ * Example function to get AI fuel price suggestion safely
+ * Uses the imported async function
+ */
+export async function fetchAiFuelSuggestion(
   input: FuelPriceSuggestionInput
 ): Promise<FuelPriceSuggestionOutput> {
   try {
-    const suggestion = await getAiSuggestion(input);
-    return suggestion;
+    const result = await getAiSuggestion(input);
+    return result;
   } catch (error) {
-    console.error("Error getting AI fuel price suggestion:", error);
-    // In a real app, you might want to return a more specific error
-    throw new Error("Failed to get suggestion from AI.");
+    console.error("Error fetching AI suggestion, returning fallback:", error);
+    return fallbackSuggestion;
   }
 }
